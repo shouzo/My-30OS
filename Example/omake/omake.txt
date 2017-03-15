@@ -1,0 +1,106 @@
+光碟附檔之內容說明
+
+針對以下內容若有任何不清楚之處，敬請前往筆者網站諮詢。
+
+1. tolsrc資料夾
+此為Tolset的原始程式。雖然擁有這個程式也不沒什麼參考價值，但是覺得聊勝於無吧，所以還是先放入了光碟中（我是認為讀者群中至少會有某一個人想要讀讀看吧！）。
+
+aksa1a
+為aksa.exe的原始程式。
+-- 此為ASKA的原始軟體（從執行檔案開始製作原始程式）。關於ASKA方面請參考下述內容。
+
+aska
+為aska.exe的原始程式。
+-- 與nask語法不同的組合程式語言。例如：EAX = ECX; 為MOV。筆者雖然相當喜歡用這個原始程式，但是因為bug等狀況太多，其實不太好使用。因此不太推薦給各位讀者。
+
+bim2bi4w 
+為bim2bin.exe的原始程式。
+
+bim2hrb
+為bim2hrb.exe的原始程式。
+
+bin2obj
+為bin2obj.exe的原始程式。
+
+doscmd0a
+為doscmd.exe的原始程式。
+-- 這些工具主要是為了給那些使用Cygwin，因而導致執行tolset不太順利的人所使用。詳細內容請見tolopt/fix_cygw/readme.txt，或前往筆者網頁查詢。
+
+edimg0j
+為edimg.exe的原始程式。
+
+go_0023s 
+為cc1.exe, cpp0.exe, nask.exe, gas2nask.exe, golib00.exe, naskcnv0.exe, sjisconv.exe, golibc.lib, w32clibc.lib的原始程式。
+       cc1.exe       -- C compiler （編譯程序）
+       cpp0.exe      -- 僅用來處理 #include 與 #define 的程式
+       nask.exe      -- 組合程式語言
+       gas2nask.exe  -- 將cc1的輸出變更為nask格式
+       golib00.exe   -- 程式庫
+       naskcnv0.exe  -- 將aska的輸出變更為nask格式
+       sjisconv.exe  --將包含全形文字的原始程式以cc1變更為可安全處理的格式
+       golibc.lib    -- sprintf等，不依賴OS的標準函數，為其程式庫編譯程序下之附加產物
+       w32clibc.lib  -- Windows用之標準函數程式庫
+
+hrblib0a 
+為z_tools/haribote/harilibc.lib的原始程式。
+-- 是為了呼叫HariMain的程式庫。
+
+imgtol0d
+為imgtol.com的原始程式。
+
+makefont
+為makefont.exe的原始程式。
+
+obj2bi4d
+為obj2bim.exe的原始程式。
+
+osalink1
+為osalink1.exe的原始程式。
+-- 此為OSASK OS本體專用的連結程式。雖然加入這個程式也沒有什麼太大的幫助，但是在tolset中加入這個程式，已經成為OSASK世界的慣例，因此，筆者自然而然就把它放進來了。沒有其他辦法只好硬著頭皮把這個程式放入，如此而已。
+
+sartol0j
+為sartol.exe的原始程式。
+-- 解壓縮軟體。可解開使用tek進行檔案壓縮後所製成並存放檔案用的資料夾（類似.zip）。標準的壓縮檔案為.sar。
+
+tk5lgpl1
+為t5lzma.exe的原始程式。
+
+
+2. osask資料夾
+此資料夾中是筆者所製作的OSASK ver.4.7。算是一項大放送！雖然這個東西沒有什麼參考價值，但是或許可以幫各位打發一點時間。
+
+osat47i 
+為最基本的OSASK＝Package。我想等各位讀到README0.TXT的第4.章後就能夠輕易地進行安裝。雖然在其他章節中也有提到如何安裝至HDD以及記憶卡的方法，然而，由於有非常多需要注意的事項，如果不遵守將導致嚴重的後果，在此並不特別建議各位讀者使用。
+
+osat47uf
+使用USB插槽的軟碟機（FDD）的讀者，建議用此取代osat47i。
+
+osat47cd
+為光碟啟動用之.ISO檔案版OSASK。
+
+make47
+為OSASK ver.4.7 的原始檔案。
+
+
+3.heboos資料夾
+此為筆者於 http://community.osdev.info/?FirstStep 所開發、並公諸於世且非常低階的OS。當初只有用程式組合語言撰寫，而且是採用16 bit模式。到本書出版為止，我都是使用這個資料夾的東西來製作「作業系統自作入門」。
+
+Minifsos意思是指「迷你（Mini）、最初階（First-step）的OS」，此OS只有80 byte。只有稍微描繪出一些圖像。詳細內容請參閱上述網址。
+
+Heboos的意思是指「不怎麼樣的OS」，OS本體可以增加1.08KB。雖然檔案的體積不到「紙糊道具OS」的3%，但是卻已經能夠執行dir指令了。詳細內容請參閱上述網址。
+
+總之，藉由本書學會OS的製作之後，上述內容幾乎就毫無參考價值了。我想只要以asmhead.nas製作OS的範例應該就可以讓各位讀者容易理解其製作方法。這個部分就當作是附贈給各位的禮物，只用程式組合語言也能打造出簡單製作OS的一片天！
+
+
+4. tolopt資料夾
+這是用來擴展及改良tolset用的資料夾。可以說是Tolset的選配用資料夾（Option Kit）。請有需要的人多加利用（基本上應該不會有需要）。
+
+fix_cygw 
+這是為了那些使用了Cygwin卻無法順利make的人所提供的檔案。
+
+bochs226
+為了那些無論怎麼做QEMU都無法順利執行，或是已經厭煩QEMU，而想要嘗試其他的模擬器（Emulator）的讀者，所準備的bochs-2.2.6。
+
+
+5. 其他
+如果想要用QEMU輕鬆地體驗筆者所製作的OSASK，請點按滑鼠兩次開啟tolset/z_osabin/ 中的run.bat。使用方法等相關資訊，請參照上述osat47i中readme等內容。
