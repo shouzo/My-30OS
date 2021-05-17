@@ -1,0 +1,120 @@
+     1                                  ; haribote-ipl
+     2                                  ; TAB=4
+     3                                  
+     4                                  		ORG		0x7c00              ;   指定從 0x7c00 開始執行	
+     5                                  
+     6                                  ;   以下是為了標準 FAT12 格式的軟式磁碟片的記述
+     7                                  
+     8 00000000 EB4E                    		JMP		entry
+     9 00000002 90                      		DB		0x90
+    10 00000003 48415249424F5445        		DB		"HARIBOTE"		
+    11 0000000B 0002                    		DW		512				
+    12 0000000D 01                      		DB		1				
+    13 0000000E 0100                    		DW		1				
+    14 00000010 02                      		DB		2				
+    15 00000011 E000                    		DW		224				
+    16 00000013 400B                    		DW		2880			
+    17 00000015 F0                      		DB		0xf0			
+    18 00000016 0900                    		DW		9				
+    19 00000018 1200                    		DW		18				
+    20 0000001A 0200                    		DW		2				
+    21 0000001C 00000000                		DD		0				
+    22 00000020 400B0000                		DD		2880			
+    23 00000024 000029                  		DB		0,0,0x29		
+    24 00000027 FFFFFFFF                		DD		0xffffffff		
+    25 0000002B 48415249424F54454F-     		DB		"HARIBOTEOS "	
+    25 00000034 5320               
+    26 00000036 4641543132202020        		DB		"FAT12   "		
+    27 0000003E <res 00000012>          		RESB	18				
+    27          ******************       warning: uninitialized space declared in .text section: zeroing [-w+other]
+    28                                  
+    29                                  
+    30                                  
+    31                                  
+    32                                  ;   程式碼本身
+    33                                  
+    34                                  entry:
+    35 00000050 B80000                  		MOV		AX,0                ;   暫存器初始化
+    36 00000053 8ED0                    		MOV		SS,AX
+    37 00000055 BC007C                  		MOV		SP,0x7c00
+    38 00000058 8ED8                    		MOV		DS,AX
+    39                                  
+    40                                  
+    41                                  ;   ---- 20210517 新增的部份 (START) ----
+    42 0000005A B82008                  		MOV		AX,0x0820
+    43 0000005D 8EC0                    		MOV		ES,AX
+    44 0000005F B500                    		MOV		CH,0                ;   磁柱0			
+    45 00000061 B600                    		MOV		DH,0			    ;   磁頭0
+    46 00000063 B102                    		MOV		CL,2			    ;   磁區2
+    47                                  
+    48                                  readloop:
+    49 00000065 BE0000                          MOV     SI,0                ;   計算失敗次數的暫存器
+    50                                  retry:
+    51 00000068 B402                    		MOV		AH,0x02             ;   AH=0x02：讀入磁碟片			
+    52 0000006A B001                    		MOV		AL,1			    ;   1個磁區
+    53 0000006C BB0000                  		MOV		BX,0
+    54 0000006F B200                    		MOV		DL,0x00			    ;   A磁碟機
+    55 00000071 CD13                    		INT		0x13			    ;   呼叫磁碟片 BIOS
+    56 00000073 7333                            JNC     fin                 ;   如果出現錯誤就到 fin
+    57 00000075 83C601                          ADD     SI,1                ;   SI 加 1
+    58 00000078 83FE05                          CMP     SI,5                ;   SI 與 5 做比較
+    59                                          JAE     erro                ;   如果 SI >= 5，就到 erro
+    59          ******************       error: symbol `erro' undefined
+    60 0000007B B400                            MOV     AH,0x00
+    61 0000007D B200                            MOV     DL,0x00             ;   A磁碟機
+    62 0000007F CD13                            INT     0x13                ;   磁碟機的重設
+    63 00000081 EBE5                            JMP     retry
+    64                                  next:
+    64          ******************       error: label `next' changed during code generation [-w+error=label-redef-late]
+    65 00000083 8CC0                            MOV     AX,ES               ;   位址前進到 0x200
+    66 00000085 83C020                          ADD     AX,0x0020
+    67 00000088 8EC0                            MOV     ES,AX               ;   因為沒有 "ADD    Es,0x020" 的命令，所以才如此執行
+    68 0000008A 80C101                          ADD     CL,1                ;   CL 加 1
+    69 0000008D 80F912                          CMP     CL,18               ;   CL 與 18 做比較
+    70 00000090 76D3                            JBE     readloop            ;   若是 CL <= 18 就到 readloop
+    71 00000092 B101                            MOV     CL,1
+    72 00000094 80C601                          ADD     DH,1
+    73 00000097 80FE02                          CMP     DH,2
+    74 0000009A 72C9                            JB      readloop            ;   若是 DH < 2 就到 readloop
+    75 0000009C B600                            MOV     DH,0
+    76 0000009E 80C501                          ADD     CH,1
+    77                                          CMP     CH,CYLS
+    77          ******************       error: symbol `CYLS' undefined
+    78 000000A1 72C2                            JB      readloop            ;   若是 CH < CYLS 就到 readloop
+    79                                  ;   ---- 20210517 新增的部份 (END) ----
+    80                                  
+    81                                  
+    82                                  
+    83                                  
+    84                                  fin:
+    84          ******************       error: label `fin' changed during code generation [-w+error=label-redef-late]
+    85 000000A3 F4                      		HLT					        ;   直到有了某個物件就將 CPU 停止	
+    86 000000A4 EBFD                    		JMP		fin				    ;   無限迴圈
+    87                                  
+    88                                  error:
+    88          ******************       error: label `error' changed during code generation [-w+error=label-redef-late]
+    89 000000A6 BE[C000]                		MOV		SI,msg
+    90                                  putloop:
+    90          ******************       error: label `putloop' changed during code generation [-w+error=label-redef-late]
+    91 000000A9 8A04                    		MOV		AL,[SI]
+    92 000000AB 83C601                  		ADD		SI,1			
+    93 000000AE 3C00                    		CMP		AL,0
+    94 000000B0 74F1                    		JE		fin
+    95 000000B2 B40E                    		MOV		AH,0x0e			
+    96 000000B4 BB0F00                  		MOV		BX,15			
+    97 000000B7 CD10                    		INT		0x10			
+    98 000000B9 EBEE                    		JMP		putloop
+    99                                  msg:
+    99          ******************       error: label `msg' changed during code generation [-w+error=label-redef-late]
+   100 000000BB 0A0A                    		DB		0x0a, 0x0a		    ;   連續兩個換行
+   101 000000BD 6C6F6164206572726F-     		DB		"load error"
+   101 000000C6 72                 
+   102 000000C7 0A                      		DB		0x0a			    ;   換行
+   103 000000C8 00                      		DB		0
+   104                                  
+   105                                  		;   RESB	0x7dfe-$		;   此行編譯無法通過，故修改成 "TIMES 510-($-$$)   DB  0"
+   106                                          
+   107 000000C9 00<rept>                        TIMES 510-($-$$)    DB      0
+   108                                          ;   '$' 代表目前行的位址，'$$' 為目前 section 的位址。(TIMES 意思為重複，先確定次數再確定重複的內容)
+   109                                  
+   110 000001FE 55AA                    		DB		0x55, 0xaa
