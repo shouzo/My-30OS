@@ -1,0 +1,128 @@
+     1                                  ; os-ipl10
+     2                                  ; TAB=4
+     3                                  
+     4                                          CYLS    EQU     10          ;   讀取 10 次 (磁柱的份量)
+     5                                  
+     6                                  
+     7                                  		ORG		0x7c00              ;   指定從 0x7c00 開始執行	
+     8                                  
+     9                                  ;   以下是為了標準 FAT12 格式的軟式磁碟片的記述
+    10                                  
+    11 00000000 EB4E                    		JMP		entry
+    12 00000002 90                      		DB		0x90
+    13 00000003 48415249424F5445        		DB		"HARIBOTE"		
+    14 0000000B 0002                    		DW		512				
+    15 0000000D 01                      		DB		1				
+    16 0000000E 0100                    		DW		1				
+    17 00000010 02                      		DB		2				
+    18 00000011 E000                    		DW		224				
+    19 00000013 400B                    		DW		2880			
+    20 00000015 F0                      		DB		0xf0			
+    21 00000016 0900                    		DW		9				
+    22 00000018 1200                    		DW		18				
+    23 0000001A 0200                    		DW		2				
+    24 0000001C 00000000                		DD		0				
+    25 00000020 400B0000                		DD		2880			
+    26 00000024 000029                  		DB		0,0,0x29		
+    27 00000027 FFFFFFFF                		DD		0xffffffff		
+    28 0000002B 48415249424F54454F-     		DB		"HARIBOTEOS "	
+    28 00000034 5320               
+    29 00000036 4641543132202020        		DB		"FAT12   "		
+    30 0000003E <res 00000012>          		RESB	18				
+    30          ******************       warning: uninitialized space declared in .text section: zeroing [-w+other]
+    31                                  
+    32                                  
+    33                                  
+    34                                  
+    35                                  ;   程式碼本身
+    36                                  
+    37                                  entry:
+    38 00000050 B80000                  		MOV		AX,0                ;   暫存器初始化
+    39 00000053 8ED0                    		MOV		SS,AX
+    40 00000055 BC007C                  		MOV		SP,0x7c00
+    41 00000058 8ED8                    		MOV		DS,AX
+    42                                  
+    43                                  
+    44                                  ;   ---- 20210517 新增的部份 (START) ----
+    45 0000005A B82008                  		MOV		AX,0x0820
+    46 0000005D 8EC0                    		MOV		ES,AX
+    47 0000005F B500                    		MOV		CH,0                ;   磁柱0			
+    48 00000061 B600                    		MOV		DH,0			    ;   磁頭0
+    49 00000063 B102                    		MOV		CL,2			    ;   磁區2
+    50                                  
+    51                                  
+    52                                  readloop:
+    53 00000065 BE0000                          MOV     SI,0                ;   計算失敗次數的暫存器
+    54                                  
+    55                                  
+    56                                  retry:
+    57 00000068 B402                    		MOV		AH,0x02             ;   AH=0x02：讀入磁碟片			
+    58 0000006A B001                    		MOV		AL,1			    ;   1個磁區
+    59 0000006C BB0000                  		MOV		BX,0
+    60 0000006F B200                    		MOV		DL,0x00			    ;   A磁碟機
+    61 00000071 CD13                    		INT		0x13			    ;   呼叫磁碟片 BIOS
+    62 00000073 7310                            JNC     next                 ;   如果出現錯誤就到 next
+    63 00000075 83C601                          ADD     SI,1                ;   SI 加 1
+    64 00000078 83FE05                          CMP     SI,5                ;   SI 與 5 做比較
+    65 0000007B 7335                            JAE     error                ;   如果 SI >= 5，就到 error
+    66 0000007D B400                            MOV     AH,0x00
+    67 0000007F B200                            MOV     DL,0x00             ;   A磁碟機
+    68 00000081 CD13                            INT     0x13                ;   磁碟機的重設
+    69 00000083 EBE3                            JMP     retry
+    70                                  
+    71                                  
+    72                                  next:
+    73 00000085 8CC0                            MOV     AX,ES               ;   位址前進到 0x200
+    74 00000087 83C020                          ADD     AX,0x0020
+    75 0000008A 8EC0                            MOV     ES,AX               ;   因為沒有 "ADD    Es,0x020" 的命令，所以才如此執行
+    76 0000008C 80C101                          ADD     CL,1                ;   CL 加 1
+    77 0000008F 80F912                          CMP     CL,18               ;   CL 與 18 做比較
+    78 00000092 76D1                            JBE     readloop            ;   若是 CL <= 18 就到 readloop
+    79 00000094 B101                            MOV     CL,1
+    80 00000096 80C601                          ADD     DH,1
+    81 00000099 80FE02                          CMP     DH,2
+    82 0000009C 72C7                            JB      readloop            ;   若是 DH < 2 就到 readloop
+    83 0000009E B600                            MOV     DH,0
+    84 000000A0 80C501                          ADD     CH,1
+    85 000000A3 80FD0A                          CMP     CH,CYLS
+    86 000000A6 72BD                            JB      readloop            ;   若是 CH < CYLS 就到 readloop
+    87                                  
+    88                                  
+    89                                          ;   提醒 haribote.sys 讀到磁碟片的哪裡為止
+    90 000000A8 882EF00F                        MOV     [0x0ff0], CH
+    91 000000AC E9(00C2)                        JMP     0xc200
+    92                                  
+    93                                  
+    94                                  ;   ---- 20210517 新增的部份 (END) ----
+    95                                  
+    96                                  
+    97                                  
+    98                                  
+    99                                  fin:
+   100 000000AF F4                      		HLT					        ;   直到有了某個物件就將 CPU 停止	
+   101 000000B0 EBFD                    		JMP		fin				    ;   無限迴圈
+   102                                  
+   103                                  error:
+   104 000000B2 BE[C700]                		MOV		SI,msg
+   105                                  putloop:
+   106 000000B5 8A04                    		MOV		AL,[SI]
+   107 000000B7 83C601                  		ADD		SI,1			
+   108 000000BA 3C00                    		CMP		AL,0
+   109 000000BC 74F1                    		JE		fin
+   110 000000BE B40E                    		MOV		AH,0x0e			
+   111 000000C0 BB0F00                  		MOV		BX,15			
+   112 000000C3 CD10                    		INT		0x10			
+   113 000000C5 EBEE                    		JMP		putloop
+   114                                  msg:
+   115 000000C7 0A0A                    		DB		0x0a, 0x0a		    ;   連續兩個換行
+   116 000000C9 6C6F6164206572726F-     		DB		"load error"
+   116 000000D2 72                 
+   117 000000D3 0A                      		DB		0x0a			    ;   換行
+   118 000000D4 00                      		DB		0
+   119                                  
+   120                                  		;   RESB	0x7dfe-$		;   此行編譯無法通過，故修改成 "TIMES 510-($-$$)   DB  0"
+   121                                          
+   122 000000D5 00<rept>                        TIMES 510-($-$$)    DB      0
+   123                                          ;   '$' 代表目前行的位址，'$$' 為目前 section 的位址。(TIMES 意思為重複，先確定次數再確定重複的內容)
+   124                                  
+   125 000001FE 55AA                    		DB		0x55, 0xaa
