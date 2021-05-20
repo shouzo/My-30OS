@@ -15,6 +15,6 @@ void HariMain(void)
     }
 
     for (;;) {
-        io_hlt(); /* 這樣在 naskfunc.nas 的 io_hlt 將會執行 */
+        io_hlt(); /* 這樣在 nasmfunc.asm 的 io_hlt 將會執行 */
     }	
 }
