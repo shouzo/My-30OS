@@ -23,13 +23,14 @@ nasmfunc.o   : nasmfunc.asm
 BOOTPACK_FILES := bootpack.c nasmfunc.o
 bootpack.hrb : ${BOOTPACK_FILES} os.lds
 	@make make-debug-dir
-	
+		
 	gcc -march=i486 -m32 -nostdlib -g -O0 \
 		-T os.lds \
 		-o $@ \
 		-fno-pie\
 		${BOOTPACK_FILES}
-	
+
+
 	objdump ${OBJDUMP_FLAGS} $@ > ${DEBUG_DIR}/$@.dasm
 
 
