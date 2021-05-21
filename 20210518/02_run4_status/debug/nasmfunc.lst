@@ -1,0 +1,80 @@
+     1                                  ; nasmfunc
+     2                                  ; TAB=4
+     3                                  
+     4                                  
+     5                                  ; ===========================================
+     6                                  section .text
+     7                                      GLOBAL	io_hlt, io_cli, io_sti, io_stihlt
+     8                                  	GLOBAL	io_in8, io_in16, io_in32
+     9                                  	GLOBAL	io_out8, io_out16, io_out32
+    10                                  	GLOBAL	io_load_eflags, io_store_eflags
+    11                                  ; ===========================================
+    12                                  
+    13                                  
+    14                                  ; ===========================================
+    15                                  io_hlt:			; void io_hlt(void);
+    16 00000000 F4                              hlt
+    17 00000001 C3                              ret
+    18                                  
+    19                                  io_cli:			; void io_cli(void);
+    20 00000002 FA                              cli
+    21 00000003 C3                              ret
+    22                                  
+    23                                  io_sti:			; void io_sti(void);
+    24 00000004 FB                              sti
+    25 00000005 C3                              ret
+    26                                  
+    27                                  io_stihlt:      ; void io_stihlt(void);
+    28 00000006 FB                              sti
+    29 00000007 F4                              hlt
+    30 00000008 C3                              ret
+    31                                  
+    32                                  io_in8:			; int io_in8(int port);
+    33 00000009 8B542404                        mov     edx, [esp + 4]      ; port
+    34 0000000D B800000000                      mov     eax, 0
+    35 00000012 EC                              in      al, dx              ; 8
+    36 00000013 C3                              ret
+    37                                  
+    38                                  io_in16:        ; int io_in16(int port);
+    39 00000014 8B542404                        mov     edx, [esp + 4]      ; port
+    40 00000018 B800000000                      mov     eax, 0
+    41 0000001D 66ED                            in      ax, dx              ; 16
+    42 0000001F C3                              ret
+    43                                  
+    44                                  in_in32:        ; int io_in16(int port);
+    45 00000020 8B542404                        mov     edx, [esp + 4]      ; port
+    46 00000024 ED                              in      eax, dx             ; 32
+    47 00000025 C3                              ret
+    48                                  
+    49                                  io_out8:        ; void io_out8(int port, int data);
+    50 00000026 8B542404                        mov     edx, [esp + 4]      ; port
+    51 0000002A 8A442408                        mov     al, [esp + 8]       ; data
+    52 0000002E EE                              out     dx, al              ; 8
+    53 0000002F C3                              ret
+    54                                  
+    55                                  io_out16:       ; void io_out16(int port, int data);
+    56 00000030 8B542404                        mov     edx, [esp + 4]      ; port
+    57 00000034 8B442408                        mov     eax, [esp + 8]      ; data
+    58 00000038 66EF                            out     dx, ax              ; 16
+    59 0000003A C3                              ret
+    60                                  
+    61                                  io_out32:       ; void io_out32(int port, int data);
+    62 0000003B 8B542404                        mov     edx, [esp + 4]      ; port
+    63 0000003F 8B442408                        mov     eax, [esp + 8]      ; data
+    64 00000043 EF                              out     dx, eax             ; 32
+    65 00000044 C3                              ret
+    66                                  
+    67                                  io_load_eflags:     ; int io_load_eflags(void);
+    68 00000045 9C                              pushfd      ; push eflags 的意思
+    69 00000046 58                              pop     eax
+    70 00000047 C3                              ret
+    71                                  
+    72                                  io_store_eflags:    ; void io_store_eflags(int eflags);
+    73 00000048 8B442404                        mov     eax, [esp + 4]
+    74 0000004C 50                              push    eax
+    75 0000004D 9D                              popfd       ; pup eflags 的意思
+    76 0000004E C3                              ret
+    77                                  
+    78                                  
+    79                                  
+    80                                  
